@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI活用レベル診断</title>
+<meta name="description" content="12の質問に答えるだけで、会社の生成AI活用レベルが分かる無料診断">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1d2433; --sub:#5b6577; --line:#dfe3ea;
+  --brand:#1f5eff; --brand-ink:#ffffff; --brand-soft:#e8efff; --ok:#14866d; --warn:#b5560b;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;line-height:1.7;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 100px}
+header.brand{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 18px;margin-bottom:16px}
+h1{font-size:24px;line-height:1.45;margin:4px 0 12px}
+h2{font-size:19px;line-height:1.5;margin:0 0 12px}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--sub);font-size:13px}
+.pill{display:inline-block;font-size:12px;background:var(--brand-soft);color:var(--brand);border-radius:999px;padding:2px 10px;margin:0 6px 6px 0}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:15px 16px;font-size:16px;font-weight:700;background:var(--brand);color:var(--brand-ink);cursor:pointer;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:transparent;color:var(--sub);font-weight:400;font-size:14px;padding:10px}
+ul.points{padding-left:1.2em;margin:6px 0 14px}
+ul.points li{margin-bottom:4px}
+/* 進み具合 */
+.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:4px 0 18px}
+.progress>i{display:block;height:100%;background:var(--brand);width:0;transition:width .25s}
+.qmeta{font-size:13px;color:var(--sub);display:flex;justify-content:space-between}
+.choices{display:grid;gap:10px;margin-top:14px}
+.choice{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--ink);cursor:pointer;line-height:1.55}
+.choice:hover{border-color:var(--brand)}
+.choice.sel{border-color:var(--brand);background:var(--brand-soft)}
+/* 結果 */
+.level{display:flex;align-items:baseline;gap:10px;margin:6px 0 4px}
+.level b{font-size:44px;line-height:1;color:var(--brand)}
+.level span{font-size:20px;font-weight:700}
+.ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:12px 0 4px}
+.ladder div{height:8px;border-radius:4px;background:var(--line)}
+.ladder div.on{background:var(--brand)}
+.ladder-label{display:flex;justify-content:space-between;font-size:11px;color:var(--sub)}
+svg.radar{display:block;margin:6px auto 0;max-width:320px;width:100%;height:auto}
+.intro{padding:6px 2px 14px}
+/* 登録前のレポート: 見出しだけ読めて、本文は細かいモザイク */
+.mosaic .card{position:relative;overflow:hidden;user-select:none;-webkit-user-select:none}
+.mosaic .card > *:not(h2):not(h1){filter:blur(3px)}
+.mosaic .card::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.55) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.55) 1px,transparent 1px);background-size:5px 5px}
+.mosaic button,.mosaic .unlock-only{display:none}
+.sticky{position:fixed;left:0;right:0;bottom:0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:rgba(246,247,249,.94);border-top:1px solid var(--line);transition:transform .2s}
+.sticky .btn{max-width:528px;margin:0 auto}
+.sticky.off{transform:translateY(110%)}
+form label{display:block;font-size:14px;font-weight:700;margin:14px 0 4px}
+form input[type=text],form input[type=email]{width:100%;font-size:16px;padding:12px;border:1.5px solid var(--line);border-radius:10px}
+form .req{color:var(--warn);font-size:12px;margin-left:4px;font-weight:400}
+form .agree{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:400;margin:16px 0}
+.err{color:var(--warn);font-size:13px;min-height:1em;margin-top:6px}
+/* レポート */
+table.axes{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+table.axes td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.axes td.sc{white-space:nowrap;text-align:right;color:var(--brand);font-weight:700}
+.bar{height:6px;background:var(--line);border-radius:4px;margin-top:5px}
+.bar>i{display:block;height:100%;border-radius:4px;background:var(--brand)}
+.axis-block{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.axis-block:first-of-type{border-top:0;margin-top:0;padding-top:0}
+ol.steps{padding-left:1.3em;margin:6px 0}
+ol.steps li{margin-bottom:6px}
+.usecase{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.prompt{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:6px}
+.prompt-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);margin-bottom:4px}
+.prompt pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:14px;line-height:1.65}
+.copy{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;color:var(--brand);cursor:pointer}
+.plan{background:var(--brand-soft);border-radius:12px;padding:16px;margin-top:10px}
+.hide{display:none}
+@media print{.noprint{display:none!important} body{background:#fff} .card{border:0;padding:0 0 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand"><span id="sellerName"></span><span>無料・約3分</span></header>
+
+  <!-- 1. 入口 -->
+  <section id="v-start" class="card">
+    <span class="pill">無料</span><span class="pill">登録なしで結果が見られます</span><span class="pill">12問・約3分</span>
+    <h1>あなたの会社の<br>生成AI活用レベル診断</h1>
+    <p>ChatGPT などの生成AIを、社内でどこまで使いこなせているか。かんたんな選択式の質問に答えるだけで、5段階のレベルで分かります。</p>
+    <ul class="points">
+      <li>「利用の広がり」「ルールと安全」「人材とスキル」「業務への組み込み」「経営の関与」の5つの面から見ます</li>
+      <li>正確な数字が分からなくても、近いものを選べば大丈夫です</li>
+      <li>レベルとグラフは、登録なしでその場で表示されます</li>
+    </ul>
+    <button class="btn" id="startBtn">診断をはじめる</button>
+    <p class="muted" style="margin-top:12px">※ 経営者・管理職・推進担当の方を想定しています。ご自身から見た会社の様子でお答えください。</p>
+  </section>
+
+  <!-- 2. 質問 -->
+  <section id="v-quiz" class="card hide">
+    <div class="qmeta"><span id="qAxis"></span><span id="qCount"></span></div>
+    <div class="progress"><i id="qBar"></i></div>
+    <h2 id="qText"></h2>
+    <div class="choices" id="qChoices"></div>
+    <button class="btn ghost noprint" id="backBtn">← 前の質問に戻る</button>
+  </section>
+
+  <!-- 3. 結果（無料で見える範囲）＋ 登録 -->
+  <section id="v-result" class="hide">
+    <div class="card">
+      <p class="muted">診断結果</p>
+      <div class="level"><b id="rLevel"></b><span id="rName"></span></div>
+      <div class="ladder" id="rLadder"></div>
+      <div class="ladder-label"><span>未着手</span><span>戦略的に活用</span></div>
+      <p style="margin-top:14px" id="rSummary"></p>
+      <div id="rRadar"></div>
+      <p class="muted" style="text-align:center">5つの面の点数（各6点満点）</p>
+    </div>
+
+    <div id="lockIntro" class="intro">
+      <h2>あなたの会社向けの提案レポートができました</h2>
+      <p>回答をもとに、業種とレベルに合わせた具体的な使い方と、次にやることをまとめています。会社名とメールアドレスを登録すると、モザイクが外れて読めるようになります。</p>
+    </div>
+
+    <!-- 4. 提案レポート（登録前はモザイク） -->
+    <div id="v-report" class="mosaic">
+    <div class="card">
+      <p class="muted" id="repHead"></p>
+      <h1 style="font-size:21px">生成AI活用 提案レポート</h1>
+      <div class="level"><b id="repLevel"></b><span id="repName"></span></div>
+      <p id="repSummary"></p>
+      <table class="axes" id="repTable"></table>
+    </div>
+    <div class="card">
+      <h2 id="repIndTitle"></h2>
+      <div id="repInd"></div>
+    </div>
+    <div class="card">
+      <h2>5つの面の、次にやること</h2>
+      <div id="repAxes"></div>
+    </div>
+    <div class="card">
+      <h2>レベルを1段上げる進め方</h2>
+      <div id="repPlan"></div>
+    </div>
+    <div class="card noprint unlock-only">
+      <h2>社内研修のご相談</h2>
+      <p id="ctaText"></p>
+      <a class="btn" id="ctaBtn" href="#" target="_blank" rel="noopener"></a>
+      <button class="btn ghost" onclick="window.print()">このレポートを印刷・PDFで保存する</button>
+    </div>
+    <p class="muted unlock-only" id="footNote"></p>
+    </div>
+
+    <div class="card" id="gate">
+      <h2>登録して、レポートの続きを見る</h2>
+      <p class="muted">登録するとすぐに、この画面でモザイクが外れます。</p>
+      <form id="leadForm" novalidate>
+        <label for="fCompany">会社名<span class="req">必須</span></label>
+        <input type="text" id="fCompany" autocomplete="organization" placeholder="例）株式会社〇〇">
+        <label for="fEmail">メールアドレス<span class="req">必須</span></label>
+        <input type="email" id="fEmail" autocomplete="email" inputmode="email" placeholder="例）taro@example.co.jp">
+        <label class="agree"><input type="checkbox" id="fAgree"><span id="agreeText"></span></label>
+        <button class="btn" type="submit" id="submitBtn">登録してレポートを見る</button>
+        <div class="err" id="fErr"></div>
+        <p class="muted" id="afterNote"></p>
+      </form>
+    </div>
+  </section>
+</div>
+<div id="stickyBar" class="sticky hide"><button class="btn" id="toGate">登録してモザイクを外す</button></div>
+
+<script>
+/* ===================== 設定（ここだけ書き換える） ===================== */
+const CONFIG = {
+  sellerName: "［要確認: 運営会社名］",
+  // 登録データの送り先（Google Apps Script のウェブアプリ URL など）。空なら送らずに画面だけ進む（試作用）
+  leadEndpoint: "",
+  privacyUrl: "#",               // ［要確認: プライバシーポリシーの URL］
+  consultUrl: "#",               // ［要確認: 無料相談の予約ページ URL］
+  consultLabel: "無料の研修相談を予約する（30分・オンライン）", // ［要確認: 相談の時間・形式］
+  ctaText: "このレポートの内容をもとに、貴社の業務に合わせた研修の進め方を一緒に整理します。［要確認: 相談で何をするか・費用がかからないこと・売り込みの有無］",
+  afterNote: "ご登録いただいたメールアドレスに、研修やセミナーのご案内をお送りすることがあります。［要確認: 送る内容と頻度］",
+  footNote: "この診断は、回答をもとにした目安です。［要確認: 運営会社名・所在地・問い合わせ先］",
+};
+
+/* ===================== 質問 ===================== */
+const AXES = [
+  {id:"use",  name:"利用の広がり"},
+  {id:"rule", name:"ルールと安全"},
+  {id:"skill",name:"人材とスキル"},
+  {id:"work", name:"業務への組み込み"},
+  {id:"lead", name:"経営の関与"},
+];
+// 各選択肢の点数は 0〜3。各面 2問で 6点満点、合計 30点
+const QUESTIONS = [
+  {axis:"use", q:"社内で、ChatGPT などの生成AIを仕事に使っている人はどのくらいいますか？",
+   c:["ほとんどいない／分からない","一部の詳しい人だけ","部署によっては半分くらい","多くの社員が日常的に使っている"]},
+  {axis:"use", q:"使われ方として、いちばん近いものはどれですか？",
+   c:["まだ使われていない","調べ物や、ちょっとした文章の手直し","資料・メール・議事録の下書きなど、決まった作業","社内の資料やデータと組み合わせた、業務の仕組みの一部"]},
+  {axis:"rule", q:"生成AIを使うときの社内ルール（ガイドライン）はありますか？",
+   c:["ない","口頭での注意くらい","文書のルールがある","ルールがあり、定期的に見直して周知している"]},
+  {axis:"rule", q:"お客様の情報や社外秘の情報を入力しないための対策は、どこまでできていますか？",
+   c:["特に何もしていない","各自の判断に任せている","入力してよい情報の線引きを決めている","線引きに加え、法人向けプランなど情報が学習に使われない環境を用意している"]},
+  {axis:"skill", q:"生成AIの使い方を学ぶ機会（研修・勉強会）はありましたか？",
+   c:["ない","各自が独学している","一度、社内で勉強会や研修をした","役割や部署に合わせて、継続して学ぶ機会がある"]},
+  {axis:"skill", q:"社内で、生成AIの使い方を人に教えられる人や、推進役はいますか？",
+   c:["いない","詳しい人はいるが、教える役割ではない","推進役（担当者）が決まっている","部署ごとに推進役がいて、使い方を広めている"]},
+  {axis:"work", q:"生成AIで「時間が減った・質が上がった」と言える業務はいくつありますか？",
+   c:["ない／分からない","1〜2つ","3〜5つ","6つ以上、または部署をまたいで広がっている"]},
+  {axis:"work", q:"生成AIの効果（作業時間の短縮など）を確かめていますか？",
+   c:["確かめていない","なんとなくの感想だけ","一部の業務で、使う前後を比べた","業務ごとに目標を決めて、定期的に測っている"]},
+  {axis:"lead", q:"経営者・役員は、生成AIの活用について方針を示していますか？",
+   c:["特に何も言っていない","関心はあるが、方針はない","「使ってよい／使おう」という方針を伝えている","活用の目標を決め、自らも使っている"]},
+  {axis:"lead", q:"生成AI活用のための予算や、進める体制はありますか？",
+   c:["ない","必要になったら個別に相談","ツールや研修の予算がある","予算と担当チームがあり、計画的に進めている"]},
+];
+// 点数を付けない質問（業種別の活用例に使う）
+const PROFILE = [
+  {key:"industry", q:"業種をお選びください", c:["製造業","建設・不動産","小売・卸・飲食","IT・通信","医療・介護・福祉","士業・コンサル・サービス","その他"]},
+  {key:"size", q:"従業員数をお選びください", c:["1〜9名","10〜49名","50〜299名","300名以上"]},
+];
+
+/* ===================== レベル ===================== */
+const LEVELS = [
+  {min:0,  name:"未着手", sum:"生成AIは、まだ会社として使われていない段階です。個人で試している人がいても、会社としては情報の扱いが決まっていないため、使い始める前に最低限のルールを決めることが最初の一歩になります。"},
+  {min:7,  name:"個人任せ", sum:"使っている人はいるものの、使い方もルールも個人任せの段階です。詳しい人とそうでない人の差が広がりやすく、情報漏えいの心配も残ります。ルールと基礎の学び方をそろえると、一気に使う人が増えます。"},
+  {min:13, name:"試行", sum:"一部の業務で効果が見え始めている段階です。ここから先は、うまくいった使い方を社内で共有し、部署ごとの業務に合わせて広げられるかどうかが分かれ目になります。"},
+  {min:19, name:"定着", sum:"生成AIが日々の業務に定着しつつある段階です。効果を測り、業務の手順そのものを生成AI前提に組み替えることで、さらに大きな時間短縮が見込めます。"},
+  {min:25, name:"戦略的に活用", sum:"会社として計画的に生成AIを活用できている段階です。社内データとの連携や、新しいサービスづくりへの活用など、競争力につながる使い方に取り組む余地があります。"},
+];
+
+/* ===================== 面ごとの「次にやること」（点数帯 0-2 / 3-4 / 5-6） ===================== */
+const ADVICE = {
+  use:[
+    {s:"使う人がまだ少なく、使い方も限られています。", d:["まずは全員が使える共通のツールを1つ決める","「メールの下書き」「議事録の要約」など、誰でも使える使い方を3つ選んで紹介する","1週間、毎日1回は使ってみる期間をつくる"]},
+    {s:"使う人はいますが、広がり方にばらつきがあります。", d:["よく使っている人の使い方を、社内で10分ずつ発表してもらう","部署ごとに「AIで下書きを作る業務」を1つ決める","使ったプロンプト（指示文）を共有する置き場所をつくる"]},
+    {s:"多くの人が使っています。次は使い方の深さです。", d:["社内の資料やマニュアルを読み込ませた使い方を試す","繰り返す作業を、手順ごと AI に任せる形にできないか洗い出す","部署をまたいで、うまくいった使い方を横展開する"]},
+  ],
+  rule:[
+    {s:"会社としてのルールがなく、情報漏えいの心配が残っています。", d:["「入力してはいけない情報」（顧客の個人情報・社外秘・契約内容など）を1枚にまとめる","使ってよいツールを決めて、全員に伝える","困ったときの相談先を決める"]},
+    {s:"ルールはあるものの、まだ一人ひとりの判断に頼る部分があります。", d:["ルールを具体例つきに書き直す（「これはOK／これはNG」）","法人向けプランなど、入力した情報が学習に使われない環境を検討する","AI が作った文章を、誰がどう確認してから外に出すかを決める"]},
+    {s:"ルールと環境が整っています。", d:["新しいツールや機能が出たときの見直しの手順を決める","ルールを守れているかを、年に1〜2回点検する","取引先やお客様への説明（AI を使っていること）の方針を決める"]},
+  ],
+  skill:[
+    {s:"学ぶ機会がなく、使いこなせる人が限られています。", d:["全員向けに、基本の使い方とルールを学ぶ時間（1〜2時間）をつくる","「指示の出し方」の基本を、自社の業務の例で練習する","社内で質問できる人を1人決める"]},
+    {s:"学んだことはありますが、続ける仕組みはまだありません。", d:["部署や役割ごとに、実際の業務を題材にした練習の場をつくる","推進役を決めて、使い方を広める役割を任せる","月に1回、使い方を共有する場を設ける"]},
+    {s:"学ぶ仕組みと推進役がそろっています。", d:["推進役向けに、業務の手順を組み替える方法を学ぶ機会をつくる","新しく入った人向けの研修に生成AIを組み込む","上手な使い方をした人を評価する仕組みを検討する"]},
+  ],
+  work:[
+    {s:"業務の中で効果を実感できる場面が、まだありません。", d:["時間がかかっている文書作成の業務を3つ書き出す","その中から1つ選んで、AI で下書きを作る形を2週間試す","試す前と後で、かかった時間を記録する"]},
+    {s:"効果の出た業務はありますが、確かめ方が感覚的です。", d:["効果が出た業務の「前後の作業時間」を測る","効果の出た使い方を手順書にして、同じ業務の人に広げる","次に試す業務を部署ごとに1つずつ決める"]},
+    {s:"多くの業務で効果を確かめられています。", d:["業務の手順を AI 前提に組み替えられないか検討する","社内データと AI をつなぐ仕組み（社内の資料を検索して答えるなど）を試す","浮いた時間を何に使うかを決める"]},
+  ],
+  lead:[
+    {s:"経営としての方針がなく、社員が使ってよいか迷いやすい状態です。", d:["経営者が「生成AIを使ってよい・使おう」というメッセージを出す","経営者自身が1つ使い方を試し、社内に共有する","最初の小さな予算（ツール代・学ぶ時間）を確保する"]},
+    {s:"方針はありますが、目標や体制がまだ決まっていません。", d:["「半年で、どの業務で、どのくらい時間を減らすか」の目標を決める","推進の担当者と、使える時間・予算を決める","3か月ごとに進み具合を経営会議で確認する"]},
+    {s:"経営が主導し、体制もそろっています。", d:["生成AIを使った新しいサービスや売り方を検討する","採用・評価・育成の方針に、AI 活用を組み込む","取引先やお客様への発信で、取り組みを強みとして伝える"]},
+  ],
+};
+
+/* ===================== 1つ先のステップの使い方（業種 × レベル） =====================
+   レベル n の会社には STAGES[n-1] の使い方を出す（今のレベルから1段上がるための使い方）。
+   t = 使い方の名前、h = やり方、p = そのまま使える指示文の例（無いものもある） */
+const STAGES = [
+  "まず1人で、毎日の文章作業から試す",
+  "同じ業務で、みんなが同じ使い方をする",
+  "業務の流れに組み込み、効果を測る",
+  "社内の資料とつなぎ、決まった作業を任せる",
+  "AIで新しい価値をつくる",
+];
+const USECASES = {
+  "製造業":[
+    [{t:"取引先へのメールの下書き",h:"伝えたい要点を箇条書きで渡し、丁寧な文面にしてもらいます。送る前に必ず自分で読み直します。",p:"以下の要点で、取引先への納期遅れのお詫びメールを丁寧な文面で書いてください。\n・部品の入荷が3日遅れた\n・新しい納期は〇月〇日\n・再発防止として発注を早める"},
+     {t:"会議メモの整理",h:"走り書きのメモを貼り付けて、決まったことと宿題に分けてもらいます。",p:"次の会議メモを「決まったこと」「誰が・いつまでに・何をするか」「持ち越しの論点」に分けて整理してください。\n（ここにメモを貼る）"}],
+    [{t:"日報の書き方をそろえる",h:"現場のメモを決まった型の日報にする指示文を作り、全員で同じものを使います。読む側の手間が減ります。",p:"以下のメモを【作業内容】【不具合・気づき】【明日の予定】の型で、日報にまとめてください。推測で書き足さないでください。\n（ここにメモを貼る）"},
+     {t:"作業手順書の下書き",h:"ベテランの説明を書き起こしたものから、新人向けの手順書の下書きを作ります。仕上げはベテランが確認します。",p:"以下の説明をもとに、新人向けの作業手順書を作ってください。手順は番号付き、注意点は各手順の下に、専門用語には短い説明を付けてください。\n（ここに説明を貼る）"}],
+    [{t:"不具合報告の傾向まとめ",h:"1か月分の不具合報告（個人名を除いたもの）を渡して、よくある原因と対策の案を整理してもらい、人が確かめてから会議の資料にします。"},
+     {t:"手順書づくりを業務の流れに入れる",h:"新しい作業ができたら「AIで下書き → 担当者が確認 → 共有」と決め、手順書1本にかかる時間を導入の前後で比べます。"}],
+    [{t:"社内マニュアルに答える仕組み",h:"作業標準書や過去のトラブル対応記録を、情報が外に出ない法人向けの環境で読み込ませ、現場の質問に「どの資料の何ページか」付きで答える仕組みを試します。"},
+     {t:"仕様確認の下準備を任せる",h:"図面や仕様書の確認項目をリストにし、抜け漏れのチェックの下準備をAIに任せます。最終の判断は人が行います。"}],
+    [{t:"技術の伝承",h:"ベテランへの聞き取りを録音して文字に起こし、ノウハウ集として整理し続ける仕組みをつくります。"},
+     {t:"提案力を上げる",h:"過去の案件の記録から似た案件の事例をすぐ引き出せるようにし、営業の提案書づくりに使います。"}],
+  ],
+  "建設・不動産":[
+    [{t:"物件・見学会の紹介文の下書き",h:"物件の情報を渡して、紹介文の案を何本か出してもらい、良いものを選んで手直しします。",p:"次の物件情報をもとに、子育て中のご家族向けの紹介文を200字で3案書いてください。事実にないことは書かないでください。\n（ここに物件情報を貼る）"},
+     {t:"お客様への連絡文",h:"日程調整や工事のお知らせなど、毎回書いている連絡文の下書きを作ってもらいます。",p:"お客様に、来週の現場打ち合わせの日程候補を3つ伝えるメールを、丁寧で短い文面で書いてください。候補：〇日〇時／〇日〇時／〇日〇時"}],
+    [{t:"現場日報・報告書の型をそろえる",h:"現場で話したメモから、決まった型の報告書にする指示文を全員で使います。",p:"以下の現場メモを【本日の作業】【進み具合】【問題・確認事項】【明日の予定】の型で報告書にしてください。\n（ここにメモを貼る）"},
+     {t:"よくある質問の回答集",h:"お客様からよく聞かれる質問を集めて回答の下書きを作り、社内で確認して全員が使えるようにします。",p:"住宅の見学会でよく聞かれる次の質問に、専門用語を使わずに答える下書きを作ってください。当社の決まりが分からない部分は［要確認］と書いてください。\n（ここに質問を貼る）"}],
+    [{t:"打ち合わせ記録から変更点を整理",h:"施主との打ち合わせの文字起こしから、決まったこと・変更点・確認待ちを整理し、伝え漏れを減らします。作成時間を前後で比べます。"},
+     {t:"提案資料の構成づくりを流れに入れる",h:"提案資料はまずAIで構成案を作ってから肉付けする、と決め、1本にかかる時間を測ります。"}],
+    [{t:"社内の施工基準に答える仕組み",h:"施工基準や過去の是正記録を法人向けの環境で読み込ませ、現場の質問に出典付きで答える仕組みを試します。"},
+     {t:"1つの物件情報から告知文を一度に作る",h:"物件情報を入れると、広告文・SNS投稿・チラシの文案がそろって出てくる流れをつくります。"}],
+    [{t:"お客様の要望の傾向を営業に活かす",h:"過去の案件の要望と提案の記録を分析し、よく選ばれる提案の傾向を営業に共有します。"},
+     {t:"相談前の質問に答える窓口",h:"間取りや資金計画の相談の前に、よくある質問に答える窓口をつくります。答えられないものは担当者に引き継ぎます。"}],
+  ],
+  "小売・卸・飲食":[
+    [{t:"商品説明・POPの文案",h:"商品の特徴を渡して、短い文案を何本か出してもらいます。",p:"次の商品の特徴から、店頭POPに使う20字以内の文を5案ください。\n（ここに商品の特徴を貼る）"},
+     {t:"お客様へのお知らせ文",h:"休業日・新商品・値上げなどのお知らせ文の下書きを作ってもらいます。",p:"〇月〇日から一部商品の価格を見直すことを、常連のお客様に伝えるお知らせ文を、感謝が伝わる短い文面で書いてください。"}],
+    [{t:"SNS投稿の作り方をそろえる",h:"投稿の型と指示文を決めて、誰が作っても同じ雰囲気の投稿になるようにします。",p:"当店のInstagram投稿を作ってください。型：1行目に季節の話題、2〜3行目に商品の特徴、最後に来店のお誘い。絵文字は2つまで。商品：（ここに商品）"},
+     {t:"問い合わせ・クレームの返信の下書き",h:"よくある問い合わせへの返信の下書きをAIで作り、店長が確認して送ります。",p:"次のお問い合わせへの返信を、お詫びと今後の対応が伝わる丁寧な文面で下書きしてください。当店で決めていない約束はしないでください。\n（ここにお問い合わせを貼る）"}],
+    [{t:"レビュー・アンケートの声をまとめる",h:"月に一度、お客様の声（個人名を除いたもの）を渡して、よい点と改善点を整理し、会議で使います。"},
+     {t:"新人向けの接客マニュアル・Q&A",h:"新人によく聞かれる質問から、マニュアルとQ&Aの下書きを作る流れを決め、教える時間が減ったかを確かめます。"}],
+    [{t:"売上・在庫の数字の読み解き",h:"売上や在庫の表を渡して、気づきの候補を出してもらいます。判断は人が行います。"},
+     {t:"商品説明文をまとめて作る",h:"商品の一覧表から、ネットショップ用の説明文を一度に作る流れをつくります。"}],
+    [{t:"お客様の声と売上から商品を企画",h:"お客様の声と売上の動きを組み合わせて、新しい商品やセットの案を出します。"},
+     {t:"問い合わせの一次対応",h:"よくある問い合わせにAIが一次対応する窓口をつくります。人に引き継ぐ場面をはじめに決めておきます。"}],
+  ],
+  "IT・通信":[
+    [{t:"提案書・見積もり説明の下書き",h:"要点を渡して、お客様に出す説明文の下書きを作ってもらいます。",p:"次の要点で、見積もりの内訳を、ITに詳しくないご担当者にも分かる説明文にしてください。\n（ここに要点を貼る）"},
+     {t:"専門的な内容をやさしく書き直す",h:"技術的な説明を、お客様向けのやさしい言葉に書き直してもらいます。",p:"次の障害報告を、専門用語を使わずに、お客様の経営者向けに5行で説明してください。\n（ここに報告を貼る）"}],
+    [{t:"レビュー・テストの観点をそろえる",h:"コードレビューやテストの観点を出す指示文をチームで共有し、抜け漏れを減らします。",p:"次の仕様について、テストで確かめるべき観点を「正常」「異常」「境界値」に分けて挙げてください。\n（ここに仕様を貼る）"},
+     {t:"打ち合わせメモから要件を整理",h:"打ち合わせのメモを、要件・未確定事項・次の作業に分ける型を決めます。",p:"次の打ち合わせメモを【決まった要件】【未確定・確認待ち】【次の作業と担当】に整理してください。\n（ここにメモを貼る）"}],
+    [{t:"開発の流れに組み込む",h:"変更内容の説明文やテストコードの下書きをAIで作ることを開発の手順に入れ、かかる時間を前後で比べます。"},
+     {t:"問い合わせのよくある質問を整える",h:"過去の問い合わせからよくある質問と回答を整え、対応にかかる時間を測ります。"}],
+    [{t:"設計書・障害対応記録に答える仕組み",h:"社内の設計書や過去の障害対応記録を読み込ませ、出典付きで答える仕組みをつくります。"},
+     {t:"定型の運用作業を任せる",h:"ログの要約や定期報告書づくりなど、決まった運用作業をAIに任せる仕組みをつくります。"}],
+    [{t:"自社サービスにAIを組み込む",h:"自社のサービスにAIの機能を加え、お客様にとっての価値を上げます。"},
+     {t:"お客様の業務へのAI導入を商品にする",h:"自社で積み上げた使い方を、お客様向けの導入支援として商品にします。"}],
+  ],
+  "医療・介護・福祉":[
+    [{t:"お知らせ文をやさしい言葉に",h:"利用者やご家族向けのお知らせを、やさしい言葉に書き直してもらいます。個人の情報は入れません。",p:"次のお知らせを、ご高齢の方にも読みやすいように、やさしい言葉と短い文で書き直してください。\n（ここにお知らせを貼る。個人名は入れない）"},
+     {t:"通知・研修資料の要点まとめ",h:"長い通知や研修資料の要点を短くまとめてもらい、職員への共有に使います。",p:"次の資料の要点を、介護職員向けに5つの箇条書きでまとめてください。\n（ここに資料を貼る）"}],
+    [{t:"記録の書き方をそろえる練習",h:"個人が分からないように書き換えた例文を使って、記録の型をそろえる練習をします。",p:"次の記録の例文を【状況】【対応】【その後の様子】の型に整えてください。事実にないことは書き足さないでください。\n（ここに個人が分からない例文を貼る）"},
+     {t:"職員向けの手順書・Q&A",h:"新人によく聞かれることから、手順書やQ&Aの下書きを作ります。",p:"次の質問をもとに、新人職員向けのQ&Aを作ってください。施設の決まりが分からない部分は［要確認］と書いてください。\n（ここに質問を貼る）"}],
+    [{t:"ヒヤリハットの傾向を整理",h:"個人が分からない形にしたヒヤリハット報告をまとめて渡し、よくある場面と対策の案を整理して会議に使います。"},
+     {t:"研修資料づくりを流れに入れる",h:"研修資料はAIで下書きしてから担当者が仕上げる、と決め、作成時間を前後で比べます。"}],
+    [{t:"マニュアル・規程に答える仕組み",h:"情報が外に出ない環境で、施設のマニュアルや規程に職員の質問が出典付きで返ってくる仕組みを試します。"},
+     {t:"会議録・委員会資料の定型化",h:"会議の文字起こしから、決まった型の会議録や委員会資料を作る流れをつくります。"}],
+    [{t:"記録や申し送りの時間を減らす",h:"法令やガイドラインを確かめながら、音声入力と要約で記録や申し送りの時間を減らす仕組みを検討します。"},
+     {t:"採用・定着のための発信と教育",h:"職場の魅力の発信や、新人教育の仕組みづくりにAIを使います。"}],
+  ],
+  "士業・コンサル・サービス":[
+    [{t:"調べ物の下調べと論点の整理",h:"テーマの全体像と論点を出してもらいます。出典や法令は必ず自分で確かめます。",p:"〇〇について、お客様に説明する前に押さえるべき論点を5つ挙げ、それぞれ確認すべき資料の種類を書いてください。"},
+     {t:"お客様へのメール・案内文",h:"面談の日程調整や必要書類の案内など、決まった連絡の下書きを作ってもらいます。",p:"お客様に、次回の面談までに用意していただく書類を案内するメールを、分かりやすい箇条書きで書いてください。書類：（ここに書類）"}],
+    [{t:"提案書・報告書の構成をそろえる",h:"構成を作る指示文を事務所内で共有し、誰が作っても同じ品質の骨組みになるようにします。",p:"次の情報をもとに、お客様への提案書の構成案を作ってください。構成：現状 → 課題 → 提案 → 進め方 → 費用の考え方。\n（ここに情報を貼る）"},
+     {t:"セミナー資料・メールマガジンの文案",h:"テーマを渡して構成と文案を作ってもらい、専門家が確認して仕上げます。",p:"中小企業の経営者向けに、〇〇をテーマにしたメールマガジンを600字で書いてください。最後に相談の案内を1行入れてください。"}],
+    [{t:"面談記録から次の作業を整理",h:"同意を得た範囲で、個人が分からない形にした面談記録から要点と次の作業を整理し、作成時間を前後で比べます。"},
+     {t:"よくある相談への回答の型",h:"よくある相談への回答の型をチームで整え、回答を作る時間を測ります。"}],
+    [{t:"過去の提案書・ノウハウに答える仕組み",h:"過去の提案書や事務所のノウハウを読み込ませ、似た案件の事例を出典付きで引き出せる仕組みをつくります。"},
+     {t:"定型の書類づくりのチェックを任せる",h:"定型の書類について、抜け漏れのチェックの下準備をAIに任せます。最終確認は人が行います。"}],
+    [{t:"AIを組み込んだ新しいサービス",h:"AIで効率化した分を、お客様向けの新しいサービスメニューにします。"},
+     {t:"ノウハウを使った発信",h:"積み上げたノウハウをもとに、記事やセミナーの発信を続ける仕組みをつくります。"}],
+  ],
+  "その他":[
+    [{t:"メールの下書き",h:"伝えたい要点を箇条書きで渡して、丁寧な文面にしてもらいます。",p:"以下の要点で、取引先へのメールを丁寧で短い文面で書いてください。\n（ここに要点を貼る）"},
+     {t:"会議メモの整理",h:"走り書きのメモを、決まったことと宿題に分けてもらいます。",p:"次の会議メモを「決まったこと」「誰が・いつまでに・何をするか」に分けて整理してください。\n（ここにメモを貼る）"}],
+    [{t:"議事録の型をそろえる",h:"議事録の型と指示文を決めて、全員が同じものを使います。",p:"次の会議の文字起こしを【目的】【決定事項】【宿題（担当・期限）】【次回】の型で議事録にしてください。\n（ここに文字起こしを貼る）"},
+     {t:"社内文書を分かりやすく書き直す",h:"規程やお知らせを、誰が読んでも分かる文章に書き直してもらいます。",p:"次の社内のお知らせを、新入社員にも分かる言葉で、要点が先に来る形に書き直してください。\n（ここに文書を貼る）"}],
+    [{t:"部署ごとに1業務で効果を測る",h:"部署ごとにAIを使う業務を1つ決め、かかる時間を導入の前後で比べます。"},
+     {t:"企画書の構成づくり",h:"企画書はAIで構成案とアイデアを出してから人が肉付けする、と決めます。"}],
+    [{t:"社内の規程・マニュアルに答える仕組み",h:"社内の規程やマニュアルを法人向けの環境で読み込ませ、社員の質問に出典付きで答える仕組みを試します。"},
+     {t:"定型の報告書づくりを任せる",h:"毎月の定型の報告書づくりをAIに任せる流れをつくります。"}],
+    [{t:"AIを使った新しいサービス・売り方",h:"AIで生まれた時間や力を、新しいサービスや売り方に使います。"},
+     {t:"採用・育成にAI活用を組み込む",h:"新しく入った人の教育や評価の中に、AIの使い方を組み込みます。"}],
+  ],
+};
+
+/* ===================== レベル別の進め方と研修の組み立て ===================== */
+const PLAN = [
+  {goal:"レベル2「個人任せ」へ：安全に使い始める", steps:["入力してはいけない情報と、使ってよいツールを決める（1週間）","全員向けに、基本の使い方とルールを学ぶ時間をつくる","メール・議事録など、誰でも使える使い方を3つ試す"], training:"全社員向けの基礎研修（ルールと基本の使い方）"},
+  {goal:"レベル3「試行」へ：使い方とルールをそろえる", steps:["ルールを具体例つきに整える","部署ごとに、AI で下書きを作る業務を1つ決めて試す","推進役を決め、うまくいった使い方を共有する場をつくる"], training:"基礎研修 ＋ 部署別の実践ワーク（自社の業務を題材に）"},
+  {goal:"レベル4「定着」へ：効果を測って広げる", steps:["効果の出た業務の前後の作業時間を測る","手順書にして同じ業務の人に広げる","推進役が、部署の相談に乗れるようにする"], training:"部署別の実践研修 ＋ 推進役向けの研修"},
+  {goal:"レベル5「戦略的に活用」へ：業務の手順を組み替える", steps:["AI 前提で業務の手順を見直す","社内データと AI をつなぐ仕組みを試す","目標と体制を決め、経営会議で進み具合を確認する"], training:"推進役・管理職向けの業務改革研修 ＋ 経営層向けの勉強会"},
+  {goal:"今のレベルを強みに変える", steps:["新しいサービスや売り方への活用を検討する","採用・育成・評価に AI 活用を組み込む","取り組みを社外に発信する"], training:"管理職・経営層向けの戦略研修 ＋ 新しく入った人向けの研修づくり"},
+];
+
+/* ===================== 動き ===================== */
+const $ = id => document.getElementById(id);
+const ALLQ = [...QUESTIONS.map(x=>({...x,type:"score"})), ...PROFILE.map(x=>({...x,type:"profile"}))];
+const answers = new Array(ALLQ.length).fill(null);
+let idx = 0, result = null;
+const params = new URLSearchParams(location.search);
+
+function show(id){ ["v-start","v-quiz","v-result"].forEach(v=>$(v).classList.toggle("hide", v!==id)); window.scrollTo(0,0); }
+
+function renderQ(){
+  const q = ALLQ[idx];
+  $("qAxis").textContent = q.type==="score" ? AXES.find(a=>a.id===q.axis).name : "最後に（点数には関係しません）";
+  $("qCount").textContent = `${idx+1} / ${ALLQ.length}`;
+  $("qBar").style.width = `${(idx)/ALLQ.length*100}%`;
+  $("qText").textContent = q.q;
+  const box = $("qChoices"); box.innerHTML = "";
+  q.c.forEach((label,i)=>{
+    const b = document.createElement("button");
+    b.className = "choice" + (answers[idx]===i ? " sel":"");
+    b.textContent = label;
+    b.onclick = ()=>{ answers[idx]=i; if(idx<ALLQ.length-1){ idx++; renderQ(); } else { finish(); } };
+    box.appendChild(b);
+  });
+  $("backBtn").style.visibility = idx===0 ? "hidden" : "visible";
+}
+
+function score(){
+  const ax = Object.fromEntries(AXES.map(a=>[a.id,0]));
+  QUESTIONS.forEach((q,i)=>{ ax[q.axis] += answers[i]; });
+  const total = Object.values(ax).reduce((s,v)=>s+v,0);
+  let li = 0; LEVELS.forEach((l,i)=>{ if(total>=l.min) li=i; });
+  const prof = {}; PROFILE.forEach((p,j)=>{ prof[p.key] = p.c[answers[QUESTIONS.length+j]]; });
+  return {axes:ax, total, level:li+1, ...prof};
+}
+
+function radar(ax){
+  const n = AXES.length, cx=160, cy=150, R=100, pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a), cy+r*Math.sin(a)];};
+  let g = "";
+  [2,4,6].forEach(v=>{ g += `<polygon points="${AXES.map((_,i)=>pt(i,R*v/6).join(",")).join(" ")}" fill="none" stroke="#dfe3ea"/>`; });
+  AXES.forEach((a,i)=>{ const [x,y]=pt(i,R); g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#dfe3ea"/>`;
+    const [lx,ly]=pt(i,R+26); g+=`<text x="${lx}" y="${ly}" font-size="12" text-anchor="middle" dominant-baseline="middle" fill="#1d2433">${a.name}</text>`;
+  });
+  const poly = AXES.map((a,i)=>pt(i,R*ax[a.id]/6).join(",")).join(" ");
+  g += `<polygon points="${poly}" fill="rgba(31,94,255,.18)" stroke="#1f5eff" stroke-width="2"/>`;
+  AXES.forEach((a,i)=>{ const [x,y]=pt(i,R*ax[a.id]/6); g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="#1f5eff"/>`; });
+  return `<svg class="radar" viewBox="0 0 320 300" role="img" aria-label="5つの面の点数">${g}</svg>`;
+}
+
+function finish(){
+  result = score();
+  const L = LEVELS[result.level-1];
+  $("rLevel").textContent = "Lv." + result.level;
+  $("rName").textContent = L.name;
+  $("rLadder").innerHTML = LEVELS.map((_,i)=>`<div class="${i<result.level?'on':''}"></div>`).join("");
+  $("rSummary").textContent = L.sum;
+  $("rRadar").innerHTML = radar(result.axes);
+  renderReport("貴社");
+  show("v-result");
+  $("stickyBar").classList.remove("hide");
+  post({event:"diagnosis_completed"});
+}
+
+function band(v){ return v<=2 ? 0 : v<=4 ? 1 : 2; }
+
+function renderReport(company){
+  const r = result, L = LEVELS[r.level-1];
+  $("repHead").textContent = `${company} 様　／　${new Date().toLocaleDateString("ja-JP")}　／　${r.industry}・${r.size}`;
+  $("repLevel").textContent = "Lv." + r.level; $("repName").textContent = L.name;
+  $("repSummary").textContent = L.sum;
+  $("repTable").innerHTML = AXES.map(a=>`<tr><td>${a.name}<div class="bar"><i style="width:${r.axes[a.id]/6*100}%"></i></div></td><td class="sc">${r.axes[a.id]} / 6</td></tr>`).join("");
+  // 点数の低い面から順に
+  const order = [...AXES].sort((a,b)=>r.axes[a.id]-r.axes[b.id]);
+  $("repAxes").innerHTML = order.map((a,i)=>{ const ad = ADVICE[a.id][band(r.axes[a.id])];
+    return `<div class="axis-block"><h3>${i===0?'<span class="pill">最初に手をつけたい</span>':''}${a.name}（${r.axes[a.id]}/6）</h3><p>${ad.s}</p><ol class="steps">${ad.d.map(x=>`<li>${x}</li>`).join("")}</ol></div>`; }).join("");
+  const si = r.level-1, cases = USECASES[r.industry][si];
+  $("repIndTitle").textContent = `次の一歩：${r.industry}での具体的な使い方`;
+  const nextStage = si < STAGES.length-1 ? `<p class="muted" style="margin-top:14px">その次の段階は「${STAGES[si+1]}」。例：${USECASES[r.industry][si+1].map(c=>c.t).join("／")}</p>` : "";
+  $("repInd").innerHTML = `<p><span class="pill">${r.level<5 ? `Lv.${r.level} → Lv.${r.level+1}` : "Lv.5"}</span><b>${STAGES[si]}</b></p>`
+    + cases.map((c,i)=>`<div class="usecase"><h3>${c.t}</h3><p>${c.h}</p>${c.p ? `<div class="prompt"><div class="prompt-head"><span>そのまま使える指示文の例</span><button type="button" class="copy noprint" data-i="${i}">コピー</button></div><pre id="pr${i}">${c.p.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</pre></div>` : ""}</div>`).join("")
+    + nextStage
+    + `<p class="muted">お客様の個人情報や社外秘の情報は、社内ルールで決めた範囲でだけ扱ってください。</p>`;
+  document.querySelectorAll(".copy").forEach(b=>b.onclick=()=>{ const t=$("pr"+b.dataset.i).textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{b.textContent="コピーしました";setTimeout(()=>b.textContent="コピー",1500);}).catch(()=>{const s=getSelection(),rg=document.createRange();rg.selectNodeContents($("pr"+b.dataset.i));s.removeAllRanges();s.addRange(rg);}); });
+  const P = PLAN[r.level-1];
+  $("repPlan").innerHTML = `<h3>${P.goal}</h3><ol class="steps">${P.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+    <div class="plan"><b>このレベルに合う研修の組み立て</b><p style="margin:6px 0 0">${P.training}</p></div>`;
+  $("ctaText").textContent = CONFIG.ctaText;
+  $("ctaBtn").textContent = CONFIG.consultLabel; $("ctaBtn").href = CONFIG.consultUrl;
+  $("footNote").textContent = CONFIG.footNote;
+}
+
+function post(extra){
+  if(!CONFIG.leadEndpoint) { console.log("[試作] 送信先が未設定のため送りません", extra); return Promise.resolve(); }
+  const body = {...extra, at:new Date().toISOString(), level:result.level, total:result.total, axes:result.axes,
+    industry:result.industry, size:result.size, answers, utm_source:params.get("utm_source")||"", utm_campaign:params.get("utm_campaign")||"",
+    utm_content:params.get("utm_content")||"", ref:document.referrer};
+  // text/plain にして事前確認（CORS preflight）を避ける
+  return fetch(CONFIG.leadEndpoint,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(()=>{});
+}
+
+$("toGate").onclick = ()=>{ $("gate").scrollIntoView({behavior:"smooth"}); setTimeout(()=>$("fCompany").focus({preventScroll:true}),400); };
+// 登録フォームが見えている間は、下の固定ボタンを隠す
+if("IntersectionObserver" in window){ new IntersectionObserver(es=>es.forEach(e=>$("stickyBar").classList.toggle("off", e.isIntersecting))).observe($("gate")); }
+$("startBtn").onclick = ()=>{ idx=0; show("v-quiz"); renderQ(); };
+$("backBtn").onclick = ()=>{ if(idx>0){ idx--; renderQ(); } };
+$("sellerName").textContent = CONFIG.sellerName;
+$("agreeText").innerHTML = `<span><a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">個人情報の取り扱い</a>に同意します</span>`;
+$("afterNote").textContent = CONFIG.afterNote;
+$("leadForm").onsubmit = async e=>{
+  e.preventDefault();
+  const company = $("fCompany").value.trim(), email = $("fEmail").value.trim();
+  if(!company) return $("fErr").textContent = "会社名を入力してください";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return $("fErr").textContent = "メールアドレスの形をご確認ください";
+  if(!$("fAgree").checked) return $("fErr").textContent = "個人情報の取り扱いへの同意をお願いします";
+  $("fErr").textContent = ""; $("submitBtn").disabled = true; $("submitBtn").textContent = "送信中…";
+  await post({event:"lead_registered", company, email});
+  renderReport(company);
+  $("v-report").classList.remove("mosaic");
+  ["gate","lockIntro","stickyBar"].forEach(id=>$(id).classList.add("hide"));
+  $("v-report").scrollIntoView({behavior:"smooth"});
+};
+// 動作確認用: ?demo=1 で回答済みの状態から始める
+if(params.get("demo")){ [1,1,1,1,0,1,1,0,1,0,0,1].forEach((v,i)=>answers[i]=v); finish(); }
+</script>
+</body>
+</html>
