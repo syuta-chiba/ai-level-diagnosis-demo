@@ -234,7 +234,7 @@ ul.can li{margin-bottom:5px}
 </div>
 <div id="stickyBar" class="sticky hide"><button class="btn" id="toGate">登録して、次の一手を知る</button></div>
 
-<script src="config.js?v=20261114230306"></script>
+<script src="config.js?v=20261114232351"></script>
 <script>
 /* ===================== 設定 =====================
    本番の値は、隣の config.js に書く（そちらが優先）。下は config.js が無いときの初期値（試作用） */
@@ -670,7 +670,7 @@ window.addEventListener("online", flushQ);
 /* ===================== 古い版を出さない =====================
    公開のたびに版の番号（BUILD）が付く。開くたびに version.txt を取り直し、番号が違えば ?v=<番号> を付けて読み込み直す。
    手元で開いたとき（"dev"）と、質問に答えている途中は何もしない */
-const BUILD = "20261114230306";
+const BUILD = "20261114232351";
 if(BUILD !== "dev"){
   fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(r => r.ok ? r.text() : "").then(v => {
     v = v.trim();

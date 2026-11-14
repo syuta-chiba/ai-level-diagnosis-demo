@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>診断の質問と選択肢</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1c2331;--sub:#5d6778;--line:#dde2ea;--brand:#1f5eff;--soft:#eaf0ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 72px}
+h1{font-size:24px;line-height:1.4;margin:0 0 6px}
+.sub{color:var(--sub);font-size:13px;margin:0 0 4px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px;padding:0;list-style:none}
+.facts li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-size:13px}
+.facts b{color:var(--brand)}
+section{margin-top:34px}
+h2{display:flex;align-items:center;gap:10px;font-size:18px;line-height:1.4;margin:0 0 12px}
+.num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center}
+.num.pf{background:var(--sub)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.qh{display:flex;gap:10px;align-items:baseline;margin-bottom:10px}
+.no{flex:none;color:var(--brand);font-weight:700;font-size:13px;min-width:30px}
+.qt{font-weight:700;font-size:15.5px}
+.opts{list-style:none;margin:0;padding:0}
+.opts li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+.pt{flex:none;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.p0{background:#eef0f4;color:#5d6778}.p1{background:#e3ebff;color:#2f55b8}.p2{background:#c9d8ff;color:#1b3f9e}.p3{background:#1f5eff;color:#fff}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14.5px}
+td{padding:9px 14px;border-top:1px solid var(--line)}
+tr:first-child td{border-top:0}
+.nowrap{white-space:nowrap}
+a{color:var(--brand)}
+@media print{body{background:#fff}.q{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>診断の質問と選択肢</h1>
+  <p class="sub">2026年11月14日 時点 ／ 賃貸仲介・賃貸管理の会社向け「AI活用レベル診断」</p>
+  <p class="sub">グラフの5項目は「賃貸の業務ごと」。1項目につき 2問ずつ聞きます。</p>
+  <ul class="facts">
+    <li>質問 <b>12問</b>（点数を付ける 10問 ＋ 付けない 2問）</li>
+    <li>選択肢は <b>4つ</b>（下ほど進んでいる。0〜3点）</li>
+    <li>1項目 <b>6点</b>満点 ／ 合計 <b>30点</b>満点</li>
+  </ul>
+  <p class="sub"><a href="https://syuta-chiba.github.io/ai-level-diagnosis-demo/">実物の診断ページをさわる</a>（見せる用の試作。登録しても何も保存されません）</p>
+
+  <section>
+    <h2><span class="num">1</span>物件・契約の管理</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q1</span><span class="qt">物件や契約の情報（台帳）は、どのように管理していますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">紙や、担当者ごとのメモ・ファイル</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">Excel などの表にあるが、書き方は人によってばらばら</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった形の表や管理ソフトに、全員が同じルールで入れている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">一元化されていて、ほかの仕組みともつないで使える</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q2</span><span class="qt">更新・解約の予告・退去などの期日は、どうやって把握していますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">担当者の記憶や手帳</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">表を見て、気づいた人が確かめる</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった日に一覧を出して、全員で確かめている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">期日が近づくと、自動で知らせが届く</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+  </section>
+  <section>
+    <h2><span class="num">2</span>書類・手続き</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q3</span><span class="qt">契約・更新・退去などの書類は、どうやって作っていますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">毎回、前の書類を写して手で直す</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">ひな形はあるが、名前や日付は手で打ち込む</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">台帳の情報を、ひな形に流し込んで作っている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">契約者を選ぶと、必要な書類がまとめて自動でできる</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q4</span><span class="qt">書類に添える案内文やメールづくりに、生成AI（ChatGPT など）を使っていますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">使っていない</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">個人が、ときどき下書きに使う</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった型（指示文）を、担当者みんなで使っている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">書類と一緒に、下書きが自動で用意される</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+  </section>
+  <section>
+    <h2><span class="num">3</span>入居者・オーナー対応</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q5</span><span class="qt">入居者やオーナーへのお知らせ・返信・報告の文章づくりに、生成AIを使っていますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">使っていない</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">個人が、ときどき下書きに使う</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった型（指示文）を、担当者みんなで使っている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">対応の記録から、下書きが自動で用意される</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q6</span><span class="qt">入居者やオーナーからの連絡（問い合わせ・苦情・修繕の依頼）は、どう管理していますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">電話や口頭で受けて、担当者が覚えている</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">メモや表に残すが、書き方は人によってばらばら</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった形で記録し、対応の状況を全員が見られる</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">受付から担当の振り分けまで、仕組みで回っている</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+  </section>
+  <section>
+    <h2><span class="num">4</span>集客・問い合わせ対応</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q7</span><span class="qt">物件の紹介文や広告の文章づくりに、生成AIを使っていますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">使っていない</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">個人が、ときどき下書きに使う</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">決まった型（指示文）を、担当者みんなで使っている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">物件を登録すると、文案が自動で出てくる</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q8</span><span class="qt">お部屋探しの問い合わせへの最初の返信は、どうしていますか？</span></div>
+      <ol class="opts">
+        <li><span class="ct">担当者がその都度、一から書く</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">各自が、自分のひな形を使っている</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">全員が、同じ型で返している</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">営業時間外も含めて、最初の返信は自動で返る</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+  </section>
+  <section>
+    <h2><span class="num">5</span>セキュリティとコンプライアンス</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q9</span><span class="qt">生成AIを使うときの社内ルールはありますか？（入居者・申込者・オーナーの個人情報を入力しない、など）</span></div>
+      <ol class="opts">
+        <li><span class="ct">ない</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">口頭での注意くらい</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">文書のルールがある</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">ルールがあり、情報が学習に使われない法人向けの環境も用意している</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q10</span><span class="qt">AIが作った文章や書類を、お客様に出す前に確かめる決まりはありますか？（広告の表示の決まり、契約書類の内容など）</span></div>
+      <ol class="opts">
+        <li><span class="ct">ない</span><span class="pt p0">0点</span></li>
+        <li><span class="ct">各自の判断で見ている</span><span class="pt p1">1点</span></li>
+        <li><span class="ct">誰が確かめるかが決まっている</span><span class="pt p2">2点</span></li>
+        <li><span class="ct">確かめる手順が決まっていて、記録も残している</span><span class="pt p3">3点</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num pf">＋</span>最後に聞くこと（点数には入れない）</h2>
+    
+    <div class="q">
+      <div class="qh"><span class="no">Q11</span><span class="qt">主な業務をお選びください</span></div>
+      <ol class="opts">
+        <li><span class="ct">賃貸仲介（お部屋探しの接客）が中心</span></li>
+        <li><span class="ct">賃貸管理（入居者・オーナー対応）が中心</span></li>
+        <li><span class="ct">仲介と管理の両方</span></li>
+      </ol>
+    </div>
+    <div class="q">
+      <div class="qh"><span class="no">Q12</span><span class="qt">従業員数をお選びください</span></div>
+      <ol class="opts">
+        <li><span class="ct">1〜4名</span></li>
+        <li><span class="ct">5〜19名</span></li>
+        <li><span class="ct">20〜99名</span></li>
+        <li><span class="ct">100名以上</span></li>
+      </ol>
+    </div>
+  </section>
+  <section>
+    <h2><span class="num pf">＝</span>合計点とレベル</h2>
+    <table><tr><td class="nowrap">レベル1</td><td class="nowrap"><b>未着手</b></td><td class="nowrap">0〜6点</td></tr><tr><td class="nowrap">レベル2</td><td class="nowrap"><b>個人任せ</b></td><td class="nowrap">7〜12点</td></tr><tr><td class="nowrap">レベル3</td><td class="nowrap"><b>試行</b></td><td class="nowrap">13〜18点</td></tr><tr><td class="nowrap">レベル4</td><td class="nowrap"><b>定着</b></td><td class="nowrap">19〜24点</td></tr><tr><td class="nowrap">レベル5</td><td class="nowrap"><b>戦略的に活用</b></td><td class="nowrap">25〜30点</td></tr></table>
+  </section>
+</div>
+</body>
+</html>
