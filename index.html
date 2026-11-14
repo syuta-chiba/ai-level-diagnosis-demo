@@ -234,7 +234,7 @@ ul.can li{margin-bottom:5px}
 </div>
 <div id="stickyBar" class="sticky hide"><button class="btn" id="toGate">登録して、次の一手を知る</button></div>
 
-<script src="config.js?v=20261114225740"></script>
+<script src="config.js?v=20261114230306"></script>
 <script>
 /* ===================== 設定 =====================
    本番の値は、隣の config.js に書く（そちらが優先）。下は config.js が無いときの初期値（試作用） */
@@ -261,7 +261,7 @@ const AXES = [
   {id:"docs",   name:"書類・手続き",         label:"書類・手続き"},
   {id:"care",   name:"入居者・オーナー対応", label:"入居者・\nオーナー対応"},
   {id:"sales",  name:"集客・問い合わせ対応", label:"集客・\n問い合わせ対応"},
-  {id:"rule",   name:"ルールと体制",         label:"ルールと体制"},
+  {id:"rule",   name:"セキュリティとコンプライアンス", label:"セキュリティと\nコンプライアンス"},
 ];
 // 各選択肢の点数は 0〜3（下の選択肢ほど進んでいる）。各面 2問で 6点満点、合計 30点
 const QUESTIONS = [
@@ -283,8 +283,8 @@ const QUESTIONS = [
    c:["担当者がその都度、一から書く","各自が、自分のひな形を使っている","全員が、同じ型で返している","営業時間外も含めて、最初の返信は自動で返る"]},
   {axis:"rule", q:"生成AIを使うときの社内ルールはありますか？（入居者・申込者・オーナーの個人情報を入力しない、など）",
    c:["ない","口頭での注意くらい","文書のルールがある","ルールがあり、情報が学習に使われない法人向けの環境も用意している"]},
-  {axis:"rule", q:"生成AIの活用を進める人や、学ぶ機会はありますか？",
-   c:["ない","詳しい人が、各自で使っている","推進役が決まっていて、勉強会や研修をしたことがある","経営者が方針と予算を示し、計画的に進めている"]},
+  {axis:"rule", q:"AIが作った文章や書類を、お客様に出す前に確かめる決まりはありますか？（広告の表示の決まり、契約書類の内容など）",
+   c:["ない","各自の判断で見ている","誰が確かめるかが決まっている","確かめる手順が決まっていて、記録も残している"]},
 ];
 // 点数を付けない質問。biz は「まずおすすめの使い方」と、できること・できないことの並び順に使う
 const PROFILE = [
@@ -427,9 +427,9 @@ const ADVICE = {
     {s:"集客の文章づくりは、仕組みになっています。", d:["物件を登録すると、文案がまとめて出るようにする","営業時間外の最初の返信を、自動にする","人に引き継ぐ条件を、決めておく"]},
   ],
   rule:[
-    {s:"ルールがなく、個人情報を入力してしまう心配があります。", d:["入力してはいけない情報を、1枚にまとめる","使ってよいツールを決めて、全員に伝える","全員で、基本の使い方を学ぶ時間をつくる"]},
-    {s:"ルールはあります。次は、進める体制です。", d:["推進役を決める","情報が学習に使われない、法人向けの環境を用意する","うまくいった使い方を、月に1回共有する"]},
-    {s:"ルールと体制が、そろっています。", d:["半年の目標（どの業務で、どのくらい減らすか）を決める","新しく入った人の研修に組み込む","ルールを、年に1〜2回見直す"]},
+    {s:"ルールがなく、個人情報の入力や、確認もれの心配があります。", d:["入力してはいけない情報を、1枚にまとめる","使ってよいツールを決めて、全員に伝える","お客様に出す前に、人が確かめると決める"]},
+    {s:"ルールはあります。次は、守れる環境と手順です。", d:["情報が学習に使われない、法人向けの環境を用意する","広告と契約書類は、誰が確かめるかを決める","ルールを、具体例つきに書き直す"]},
+    {s:"ルールと確認の手順が、そろっています。", d:["確かめた記録を残す","ルールを、年に1〜2回見直す","AIを使っていることの、お客様への伝え方を決める"]},
   ],
 };
 
@@ -478,12 +478,12 @@ function score(){
 }
 
 function radar(ax){
-  const n = AXES.length, cx=170, cy=158, R=96, pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a), cy+r*Math.sin(a)];};
+  const n = AXES.length, cx=170, cy=158, R=86, pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a), cy+r*Math.sin(a)];};
   let g = "";
   [2,4,6].forEach(v=>{ g += `<polygon points="${AXES.map((_,i)=>pt(i,R*v/6).join(",")).join(" ")}" fill="none" stroke="#dfe3ea"/>`; });
   AXES.forEach((a,i)=>{ const [x,y]=pt(i,R); g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#dfe3ea"/>`;
     // 名前は 2行まで。上の頂点は図形の上に、ほかは外側に置く
-    const lines = (a.label || a.name).split("\n"), [lx,ly] = pt(i,R+30), y0 = ly - (lines.length-1)*8;
+    const lines = (a.label || a.name).split("\n"), [lx,ly] = pt(i,R+40), y0 = ly - (lines.length-1)*8;
     g+=`<text font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#1d2433">${lines.map((t,k)=>`<tspan x="${lx}" y="${y0+k*16}">${t}</tspan>`).join("")}</text>`;
     g+=`<text x="${lx}" y="${y0+lines.length*16}" font-size="11" text-anchor="middle" dominant-baseline="middle" fill="#5b6577">${ax[a.id]} / 6</text>`;
   });
@@ -670,7 +670,7 @@ window.addEventListener("online", flushQ);
 /* ===================== 古い版を出さない =====================
    公開のたびに版の番号（BUILD）が付く。開くたびに version.txt を取り直し、番号が違えば ?v=<番号> を付けて読み込み直す。
    手元で開いたとき（"dev"）と、質問に答えている途中は何もしない */
-const BUILD = "20261114225740";
+const BUILD = "20261114230306";
 if(BUILD !== "dev"){
   fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(r => r.ok ? r.text() : "").then(v => {
     v = v.trim();
